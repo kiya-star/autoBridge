@@ -1,0 +1,92 @@
+/* your styles go here */
+
+body {
+    font-family: "Poppins", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.8;
+    font-weight: normal;
+}
+
+#contactmessage input {
+    margin-bottom: 20px;
+}
+
+a:active {
+    color: green !important;
+    background-color: white;
+}
+
+.table-wrapper {
+    max-height: 100%;
+    overflow: auto;
+    width: 100%;
+    display: inline-block;
+}
+
+.loginheader a {
+    list-style: none;
+    font-size: 14px;
+    color: #706767;
+}
+
+a .loginheader {
+    padding-top: 100px;
+    text-align: center;
+    padding-bottom: 20px;
+}
+
+.userform input {
+    border-radius: 6px;
+}
+
+#loginbtn button {
+    border-radius: 6px;
+    width: 200px;
+    background: transparent;
+    color: #000;
+}
+
+#loginbtn button:hover {
+    background-color: green;
+    color: white;
+}
+
+.userform h2 {
+    padding-top: 100px;
+    text-align: center;
+}
+
+.newHeader {
+    background: #fff;
+    display: block;
+    position: fixed;
+    z-index: 2000;
+    width: 100%;
+    border-bottom: 1px solid #f3f3f3;
+}
+
+.newHeader .navbar-brand li a {
+    margin-right: 200px !important;
+}
+
+#searchbox input {
+    border: none !important;
+    border-radius: 8px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#searchbox input:focus {
+    border: 1px solid#f3f3f3;
+}
+
+a {
+    text-decoration: none;
+}
+
+.newHeader>.collapse li a {
+    float: right;
+}
+
+.logo a {
+    text-decoration: none !important;
+}
