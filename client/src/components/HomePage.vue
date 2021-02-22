@@ -49,6 +49,11 @@
               <li class="nav-item" id="account" v-if="!isloggedin">
                 <a class="nav-link " href="#" @click="account"> ACCOUNT</a>
               </li>
+               <li class="nav-item" id="contactus" v-if="isloggedin">
+                <a class="nav-link " href="#" @click="blog()">
+                  BLOG</a
+                >
+              </li>
               <li class="nav-item" id="contactus" v-if="!isloggedin">
                 <a class="nav-link " href="#" @click="goTocontactus">
                   CONTACT US</a
@@ -2412,6 +2417,10 @@
           <div class="col-sm-3"></div>
         </div>
       </div>
+    </div>
+    <div v-if="flag==10">
+      <br> <br> <br> <br>
+            <h1>blog</h1>
     </div>
     <!-- reset password ends -->
 
