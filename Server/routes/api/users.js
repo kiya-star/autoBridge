@@ -3,6 +3,9 @@ const express = require('express');
 const router = express.Router();
 const connection = require("../../config/db.config");
 const md5 = require('md5');
+var timeElapsed = Date.now();
+var today = new Date(timeElapsed);
+var now = today.toUTCString();
 
 //register new user
 router.post('/rgnewuser', (req, res) => {
@@ -194,10 +197,6 @@ router.get("/name", (req, res, next) => {
 // send feedback /txt message
 router.post("/sendfeedback", (req, res) => {
     try {
-        var timeElapsed = Date.now();
-        var today = new Date(timeElapsed);
-        var now = today.toUTCString();
-
         connection.query("INSERT INTO feedback (fromm, too, message,at, uid) VALUES ('" + req.body.obj.email + "','" + req.body.obj.to + "','" + req.body.obj.message + "','" +
             now + "','" + req.body.obj.uid + "')")
     } catch (error) {
@@ -207,6 +206,7 @@ router.post("/sendfeedback", (req, res) => {
 
 // view feedbacks / chats
 router.get("/chat", (req, res) => {
+    console.log(req.query.useremail)
     connection.query(`
                         SELECT * FROM feedback INNER JOIN users ON feedback.uid = users.id WHERE too = ? || fromm = ? ORDER BY at;
                         `, [req.query.useremail, req.query.useremail], (err, rows, fields) => {
@@ -221,6 +221,25 @@ router.get("/chat", (req, res) => {
 //get admin user
 router.get("/admin", (req, res) => {
     connection.query("SELECT * FROM users  WHERE role='admin' ", (err, rows, fields) => {
+        if (!err) {
+            res.send(rows);
+        } else
+            console.log(err);
+    })
+})
+router.post("/postnotice", (req, res) => {
+    connection.query("INSERT INTO notice(title, body, time) VALUES('" +
+        req.body.obj.title + "', '" +
+        req.body.obj.mBody + "', '" +
+        now + "')", (err, rows, fields) => {
+            if (!err) {
+                res.send({ success: "Notice Posted" });
+            } else
+                console.log(err);
+        })
+})
+router.get("/shownotice", (req, res) => {
+    connection.query("SELECT * FROM notice", (err, rows, fields) => {
         if (!err) {
             res.send(rows);
         } else

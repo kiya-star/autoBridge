@@ -1784,8 +1784,8 @@
                   <div class="col-lg-12 mb-lg-0">
                     <!-- CART TABLE-->
 
-                    <div class="table-responsive">
-                      <table class="table table-hover">
+                    <div class="table-responsive" >
+                      <table class="table table-hover" id="exportTable">
                         <div id="cart">
                           <thead class="bg-light">
                             <tr>
@@ -1840,8 +1840,8 @@
                                 </strong>
                               </th>
 
-                              <th class="border-0" scope="col">
-                                <i class="fa fa-check"></i>
+                              <th class="border-0" scope="col" @click="exportpdf()">
+                              <a href="#">  <i class="fa fa-download"></i></a>
                               </th>
                             </tr>
                           </thead>
@@ -2419,8 +2419,37 @@
       </div>
     </div>
     <div v-if="flag==10">
-      <br> <br> <br> <br>
-            <h1>blog</h1>
+    <div class="container">
+      <div class="col-sm-12">
+       <br> <br> <br> <br>
+        <h3 class="alert alert-info" >Notice </h3>
+        <p v-if="success" class="alert alert-success">{{success}}</p>
+        <div v-for="(notice , index) in noticeList" :key="index">
+          <h4>{{notice.title}}</h4>
+          <p class="text-muted" style="font-size:10px;">{{notice.time}}</p>
+          <p >{{notice.body}}</p>
+        </div>
+      </div>
+       <div class="col-sm-8" v-if="loggedInRole=='admin'">
+           <input type="text" placeholder="Title" class="form-control" v-model="title"/>
+            <textarea
+              class="form-control form-control-lg"
+              autocomplete="off"
+              v-model="mBody"
+              rows="4"
+              placeholder="Type your message ..."
+              style="margin-top:10px;"
+              required
+            ></textarea>
+             <button
+                class="btn btn-danger"
+                style="width:100px;color:#fff;border-radius:4px;margin-top:20px;margin-bottom:20px;float:right;"
+                 @click="postNotice()"
+              >
+                POST
+              </button>
+       </div>
+    </div>
     </div>
     <!-- reset password ends -->
 
@@ -2442,6 +2471,7 @@ import userService from "../../services/userService";
 import axios from "axios";
 import swal from "sweetalert";
 import Datepicker from "vuejs-datepicker";
+import TableExport from "tableexport"
 //import $ from "jquery"
 export default {
   name: "Home",
@@ -2457,6 +2487,9 @@ export default {
         email: "",
         password: "",
       },
+      title:'',
+      mBody:'',
+      noticeList:[],
       adminuser: [],
       mymessage: "",
       isdislike: false,
@@ -2671,7 +2704,11 @@ export default {
       this.modalData = await productservice.getSingleProduct(code);
       this.flag = 2; //goto detail
     },
-
+    exportpdf(){
+    TableExport(document.getElementsByTagName("table"), {
+      filename: "Sold Products",                     
+      });
+    },
     async likes(id) {
       await productservice.likeProduct(id);
       this.isdislike = true;
@@ -2692,6 +2729,9 @@ export default {
     goTocontactus() {
       this.error = "";
       this.flag = 7; // contact us
+    },
+    blog(){
+         this.flag = 10 //blog 
     },
     account() {
       this.error = "";
@@ -2786,19 +2826,24 @@ export default {
         this.menu = "product";
       } else if (this.loggedInRole == "admin" && this.menu == "dealer") {
         this.menu == "dealer";
-      } else if (this.loggedInRole == "dealer" && this.menu == "product") {
+      } else if (this.loggedInRole != "admin" && this.menu == "product") {
         this.menu == "product";
-      } else if (this.loggedInRole == "dealer" && this.menu == "cart") {
-        this.menu == "cart";
+      } else if (this.loggedInRole != "admin" && this.menu == "cart") {
+         this.menu == "cart";
+       
+       
       } else {
         this.menu = "product";
+        this.count = this.products.length;
       }
     },
     async showProductForm() {
       this.menu = "productForm";
     },
     async showProducts() {
-      this.menu = "product";
+        this.searchvalue = ''
+        this.count = this.products.length;
+        this.menu = "product";
     },
     async homeSearch(value) {
       this.productList = await productservice.search(value);
@@ -2828,6 +2873,20 @@ export default {
         this.menu = "home";
         alert(this.menu);
       }
+    },
+    async postNotice(){
+     try {
+          await userService.postNotice({
+          title:this.title,
+          mBody:this.mBody
+        })
+         this.success = "Notice Posted";
+         this.title = ''
+         this.mBody=''
+         this.noticeList = await userService.showNotice()
+     } catch (error) {
+        console.log(error)
+     }
     },
     async showSingle(name) {
       this.productList = await userService.getSingleDealer(name);
@@ -2899,7 +2958,9 @@ export default {
     },
     //=====================================cart=================================
     showCart() {
+      this.searchvalue=''
       this.menu = "cart";
+        this.count = this.soldproducts.length;
     },
     //=============================notification=======================================
     async readNotifications() {
@@ -3016,6 +3077,7 @@ export default {
       this.messages = await userService.getContactNewMessages();
       this.mcount = this.messages.length;
       this.adminuser = await userService.getadmin();
+      this.noticeList = await userService.showNotice()
     } catch (error) {
       this.error = error.message;
     }
@@ -3033,6 +3095,10 @@ export default {
   border-radius: 1rem;
   box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.3),
     0 0.0625rem 0.125rem rgba(0, 0, 0, 0.2);
+}
+#chats p:hover{
+  background-color:lightyellow;
+  color: #000;;
 }
 #chats p::before {
   content: "";

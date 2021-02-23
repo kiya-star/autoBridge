@@ -218,6 +218,24 @@ class Dealerservice {
             return err
         }
     }
+    static async postNotice(obj) {
+        try {
+            const response = await axios.post(url + "/postnotice", { obj })
+            return response.data
+
+        } catch (err) {
+            return err
+        }
+    }
+    static async showNotice() {
+        try {
+            const response = await axios.get(url + "/shownotice")
+            return response.data
+
+        } catch (err) {
+            return err
+        }
+    }
 
 }
 
