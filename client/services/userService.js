@@ -236,6 +236,19 @@ class Dealerservice {
             return err
         }
     }
+    static async resetPassword(email) {
+        try {
+            const response = await axios.get(url + "/resetpassword", {
+                params: {
+                    key: email
+                }
+            })
+            return response.data
+
+        } catch (err) {
+            return err
+        }
+    }
 
 }
 

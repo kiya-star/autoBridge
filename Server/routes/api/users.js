@@ -1,5 +1,6 @@
 const mysql = require('mysql');
 const express = require('express');
+const nodemailer = require('nodemailer');
 const router = express.Router();
 const connection = require("../../config/db.config");
 const md5 = require('md5');
@@ -35,7 +36,7 @@ router.post('/rgnewuser', (req, res) => {
 
 //login
 router.post("/login", (req, res) => {
-    connection.query('SELECT * FROM users  WHERE email=? && pass=?', [req.body.email, md5(req.body.pass)], (err, rows, fields) => {
+    connection.query('SELECT * FROM users  WHERE status=? && email=? && pass=?', ["1", req.body.email, md5(req.body.pass)], (err, rows, fields) => {
         if (!err) {
             res.send(rows)
         } else
@@ -120,7 +121,7 @@ router.put("/status", (req, res) => {
 });
 //get all users (admin page)
 router.get("/dealers", (req, res) => {
-    connection.query('SELECT * FROM users WHERE id !=1', (err, rows, fields) => {
+    connection.query('SELECT * FROM users WHERE id !=1 ORDER BY regTime DESC', (err, rows, fields) => {
         if (!err)
             res.send(rows);
         else
@@ -206,9 +207,8 @@ router.post("/sendfeedback", (req, res) => {
 
 // view feedbacks / chats
 router.get("/chat", (req, res) => {
-    console.log(req.query.useremail)
     connection.query(`
-                        SELECT * FROM feedback INNER JOIN users ON feedback.uid = users.id WHERE too = ? || fromm = ? ORDER BY at;
+                        SELECT * FROM feedback INNER JOIN users ON feedback.uid = users.id WHERE too = ? || fromm = ? ORDER BY feedback.id ;
                         `, [req.query.useremail, req.query.useremail], (err, rows, fields) => {
         if (!err) {
             res.send(rows);
@@ -245,5 +245,29 @@ router.get("/shownotice", (req, res) => {
         } else
             console.log(err);
     })
+})
+router.get("/resetpassword", (req, res) => {
+    let transport = nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+            user: 'israelkumame@gmail.com',
+            pass: '@@yayneman@@'
+        }
+    });
+    const message = {
+        from: 'israelkumame@gmail.com', // Sender address
+        to: req.query.key, // List of recipients
+        subject: 'Design Your Model S | Tesla', // Subject line
+        text: 'Have the most fun you can in a car. Get your Tesla today!' // Plain text body
+    };
+    transport.sendMail(message, function(err, info) {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log(info);
+        }
+    });
 })
 module.exports = router;

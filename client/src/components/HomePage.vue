@@ -1,5 +1,73 @@
 <template>
   <div>
+    <!-- Modal -->
+    <div
+      class="modal fade"
+      id="updateProfile"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="updateProfileTitle"
+      aria-hidden="true"
+      style="margin-top:100px;"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="updateProfileTitle">
+              Update Profile
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+                 <div class="col-sm-1"></div>
+                 <div class="col-sm-4">
+                    <img
+                      :src="`http://localhost:5000/${profile}`"
+                      alt=""
+                      width="100px;"
+                      height="100px;"
+                      class="img rounded-circle"
+                    />
+                    <br>
+                 </div>
+                  <div class="col-sm-2">
+                       <br><br>
+                      <form>
+                        <input type="file" style="margin-left:-60px;">
+                    </form>
+                  </div>
+                 <div class="col-sm-12">
+                   <div style="margin-left:50px;">
+                     <br>
+                      <h3>Adye </h3>
+                      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                     Inventore vel eius necessitatibus autem dolores quibusdam voluptatibus sapiente nostrum porro facilis culpa, quo quaerat nisi ea enim excepturi soluta quas assumenda.</p>
+                   </div>
+                </div>
+            </div>
+           
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary"   @click="updateProfile()">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- navbar-->
     <header class="header bg-white newHeader">
       <div class="container px-0 px-lg-3">
@@ -49,10 +117,8 @@
               <li class="nav-item" id="account" v-if="!isloggedin">
                 <a class="nav-link " href="#" @click="account"> ACCOUNT</a>
               </li>
-               <li class="nav-item" id="contactus" v-if="isloggedin">
-                <a class="nav-link " href="#" @click="blog()">
-                  BLOG</a
-                >
+              <li class="nav-item" id="contactus" v-if="isloggedin">
+                <a class="nav-link " href="#" @click="blog()"> BLOG</a>
               </li>
               <li class="nav-item" id="contactus" v-if="!isloggedin">
                 <a class="nav-link " href="#" @click="goTocontactus">
@@ -141,10 +207,15 @@
                           height="50px;"
                           class="img rounded-circle"
                         />
-                        <i
+
+                        <a href="#">
+                           <i
+                          data-toggle="modal"
+                          data-target="#updateProfile"
                           class="fa fa-edit"
                           style="margin-left:-5px;color:red;font-size:15px;"
                         ></i>
+                        </a>
                       </p>
                       <p
                         class="text-small"
@@ -1101,8 +1172,8 @@
           <div class="row">
             <div class="col-lg-8 ml-auto mr-auto">
               <h3 class="text-uppercase"><i class="fa fa-info"></i> Sign Up</h3>
-              <p class="alert alert-success" v-if="!iserror">
-                Thank you for registering
+              <p class="alert alert-success" v-if="success">
+                {{ success }}
               </p>
               <p v-if="error" class="alert alert-danger">
                 <i class="fa fa-warning"></i> {{ error }}
@@ -1277,6 +1348,7 @@
                   >
                   <textarea
                     class="form-control form-control-lg"
+                    id="desc"
                     name="desc"
                     type="text"
                     rows="3"
@@ -1701,9 +1773,8 @@
                   <td>
                     <select @change="updateRole(user.id)" id="role">
                       <option :value="user.role">{{ user.role }}</option>
-                      <option value="Encoder">Encoder</option>
                       <option value="admin">admin</option>
-                      <option value="Dealer">Dealer</option>
+                      <option value="dealer">dealer</option>
                     </select>
                   </td>
                   <td @click="editStatus(user.id, user.status)">
@@ -1784,7 +1855,7 @@
                   <div class="col-lg-12 mb-lg-0">
                     <!-- CART TABLE-->
 
-                    <div class="table-responsive" >
+                    <div class="table-responsive">
                       <table class="table table-hover" id="exportTable">
                         <div id="cart">
                           <thead class="bg-light">
@@ -1840,8 +1911,12 @@
                                 </strong>
                               </th>
 
-                              <th class="border-0" scope="col" @click="exportpdf()">
-                              <a href="#">  <i class="fa fa-download"></i></a>
+                              <th
+                                class="border-0"
+                                scope="col"
+                                @click="exportTable()"
+                              >
+                                <a href="#"> <i class="fa fa-download"></i></a>
                               </th>
                             </tr>
                           </thead>
@@ -2397,59 +2472,67 @@
             <label class="text-uppercase" for="email" style="float:left;"
               >Reset Password</label
             >
-            <form action="">
-              <input
-                class="form-control form-control-lg"
-                id="email"
-                type="password"
-                v-model.trim="login.password"
-                placeholder="Enter your E-mail"
-                required
-              />
-              <button
-                class="btn btn-primary "
-                style="margin-top:20px;color:#fff;"
-              >
-                Get New Password
-              </button>
-            </form>
+
+            <input
+              class="form-control form-control-lg"
+              id="email"
+              type="email"
+              v-model.trim="resetMail"
+              placeholder="Enter your E-mail"
+              required
+            />
+            <button
+              @click="resetPassword(resetMail)"
+              class="btn btn-primary "
+              style="margin-top:20px;color:#fff;"
+            >
+              Get New Password
+            </button>
           </div>
           <div class="col-sm-3"></div>
         </div>
       </div>
     </div>
-    <div v-if="flag==10">
-    <div class="container">
-      <div class="col-sm-12">
-       <br> <br> <br> <br>
-        <h3 class="alert alert-info" >Notice </h3>
-        <p v-if="success" class="alert alert-success">{{success}}</p>
-        <div v-for="(notice , index) in noticeList" :key="index">
-          <h4>{{notice.title}}</h4>
-          <p class="text-muted" style="font-size:10px;">{{notice.time}}</p>
-          <p >{{notice.body}}</p>
+    <div v-if="flag == 10">
+      <div class="container">
+        <div class="col-sm-12">
+          <br />
+          <br />
+          <br />
+          <br />
+          <h3 class="alert alert-info">Notice</h3>
+          <p v-if="success" class="alert alert-success">{{ success }}</p>
+          <div v-for="(notice, index) in noticeList" :key="index">
+            <h4>{{ notice.title }}</h4>
+            <p class="text-muted" style="font-size:10px;">{{ notice.time }}</p>
+            <p>{{ notice.body }}</p>
+          </div>
+        </div>
+        <div class="col-sm-8" v-if="loggedInRole == 'admin'">
+          <input
+            type="text"
+            placeholder="Title"
+            class="form-control"
+            v-model="title"
+          />
+          <textarea
+            class="form-control form-control-lg"
+            autocomplete="off"
+            v-model="mBody"
+            rows="4"
+            placeholder="Type your message ..."
+            style="margin-top:10px;"
+            required
+          ></textarea>
+          <button
+            class="btn btn-danger"
+            style="width:100px;color:#fff;border-radius:4px;margin-top:20px;margin-bottom:20px;float:right;"
+            @click="postNotice()"
+          >
+            POST
+          </button>
         </div>
       </div>
-       <div class="col-sm-8" v-if="loggedInRole=='admin'">
-           <input type="text" placeholder="Title" class="form-control" v-model="title"/>
-            <textarea
-              class="form-control form-control-lg"
-              autocomplete="off"
-              v-model="mBody"
-              rows="4"
-              placeholder="Type your message ..."
-              style="margin-top:10px;"
-              required
-            ></textarea>
-             <button
-                class="btn btn-danger"
-                style="width:100px;color:#fff;border-radius:4px;margin-top:20px;margin-bottom:20px;float:right;"
-                 @click="postNotice()"
-              >
-                POST
-              </button>
-       </div>
-    </div>
     </div>
     <!-- reset password ends -->
 
@@ -2471,7 +2554,7 @@ import userService from "../../services/userService";
 import axios from "axios";
 import swal from "sweetalert";
 import Datepicker from "vuejs-datepicker";
-import TableExport from "tableexport"
+import TableExport from "tableexport";
 //import $ from "jquery"
 export default {
   name: "Home",
@@ -2487,9 +2570,10 @@ export default {
         email: "",
         password: "",
       },
-      title:'',
-      mBody:'',
-      noticeList:[],
+      title: "",
+      resetMail: "",
+      mBody: "",
+      noticeList: [],
       adminuser: [],
       mymessage: "",
       isdislike: false,
@@ -2639,6 +2723,9 @@ export default {
       localStorage.removeItem("token");
       localStorage.setItem("userrole");
     },
+    async resetPassword(mail) {
+      await userService.resetPassword(mail);
+    },
     //===============================cart===============================
     async addToCart(id, itemname, price, usrid) {
       this.cart = this.cart + 1;
@@ -2704,9 +2791,9 @@ export default {
       this.modalData = await productservice.getSingleProduct(code);
       this.flag = 2; //goto detail
     },
-    exportpdf(){
-    TableExport(document.getElementsByTagName("table"), {
-      filename: "Sold Products",                     
+    exportTable() {
+      TableExport(document.getElementsByTagName("table"), {
+        filename: "Sold Products",
       });
     },
     async likes(id) {
@@ -2730,8 +2817,8 @@ export default {
       this.error = "";
       this.flag = 7; // contact us
     },
-    blog(){
-         this.flag = 10 //blog 
+    blog() {
+      this.flag = 10; //blog
     },
     account() {
       this.error = "";
@@ -2767,6 +2854,7 @@ export default {
       this.feedback();
     },
     async viewChat(email, fname, lname, cname, pic) {
+      this.chats = "";
       this.chats = await userService.getFeedback(email);
       this.currentChat = fname + " " + lname;
       this.to = email;
@@ -2805,7 +2893,7 @@ export default {
             this.error = "";
             this.iserror = false;
             // clear registration fields
-            this.userinformation = "";
+            this.success = "Welcome ,Thank you for registering";
           } else if (response.error) {
             this.iserror = true;
             this.error = response.error;
@@ -2829,9 +2917,7 @@ export default {
       } else if (this.loggedInRole != "admin" && this.menu == "product") {
         this.menu == "product";
       } else if (this.loggedInRole != "admin" && this.menu == "cart") {
-         this.menu == "cart";
-       
-       
+        this.menu == "cart";
       } else {
         this.menu = "product";
         this.count = this.products.length;
@@ -2841,9 +2927,9 @@ export default {
       this.menu = "productForm";
     },
     async showProducts() {
-        this.searchvalue = ''
-        this.count = this.products.length;
-        this.menu = "product";
+      this.searchvalue = "";
+      this.count = this.products.length;
+      this.menu = "product";
     },
     async homeSearch(value) {
       this.productList = await productservice.search(value);
@@ -2874,19 +2960,19 @@ export default {
         alert(this.menu);
       }
     },
-    async postNotice(){
-     try {
-          await userService.postNotice({
-          title:this.title,
-          mBody:this.mBody
-        })
-         this.success = "Notice Posted";
-         this.title = ''
-         this.mBody=''
-         this.noticeList = await userService.showNotice()
-     } catch (error) {
-        console.log(error)
-     }
+    async postNotice() {
+      try {
+        await userService.postNotice({
+          title: this.title,
+          mBody: this.mBody,
+        });
+        this.success = "Notice Posted";
+        this.title = "";
+        this.mBody = "";
+        this.noticeList = await userService.showNotice();
+      } catch (error) {
+        console.log(error);
+      }
     },
     async showSingle(name) {
       this.productList = await userService.getSingleDealer(name);
@@ -2936,6 +3022,9 @@ export default {
         }
       });
     },
+    updateProfile(id) {
+      alert(id);
+    },
     clearOrder() {
       this.order = "";
     },
@@ -2958,9 +3047,9 @@ export default {
     },
     //=====================================cart=================================
     showCart() {
-      this.searchvalue=''
+      this.searchvalue = "";
       this.menu = "cart";
-        this.count = this.soldproducts.length;
+      this.count = this.soldproducts.length;
     },
     //=============================notification=======================================
     async readNotifications() {
@@ -3077,7 +3166,7 @@ export default {
       this.messages = await userService.getContactNewMessages();
       this.mcount = this.messages.length;
       this.adminuser = await userService.getadmin();
-      this.noticeList = await userService.showNotice()
+      this.noticeList = await userService.showNotice();
     } catch (error) {
       this.error = error.message;
     }
@@ -3096,9 +3185,9 @@ export default {
   box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.3),
     0 0.0625rem 0.125rem rgba(0, 0, 0, 0.2);
 }
-#chats p:hover{
-  background-color:lightyellow;
-  color: #000;;
+#chats p:hover {
+  background-color: lightyellow;
+  color: #000;
 }
 #chats p::before {
   content: "";
