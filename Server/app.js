@@ -16,6 +16,7 @@ app.use("/users", usersroute);
 
 // static folder
 app.use(express.static('Server/UProduct/Images'))
+app.use(express.static('Server/Uprofile/Images'))
 
 app.get('/', (req, res) => {
     res.send({ api: "Express api " })

@@ -1,9 +1,7 @@
 /**
- * 
- * purpose
- * author
- * date
- * modified time
+ * backend rest api handle users request & response specifically for product
+ * Author abebaw ,beza lidet & tarik
+ * Last Modified Date: feb 27 , 2021
  */
 const mysql = require('mysql');
 const express = require('express');
@@ -57,23 +55,13 @@ router.post('/add', upload.single('image'), (req, res) => {
 //update product information
 router.post("/productedit", upload.single('photo'), (req, res) => {
         try {
+            console.log(req.body)
             var year = req.body.year.slice(-4);
-            connection.query(`UPDATE products SET 
-            pname=${req.body.pname} ,
-            pcode=${req.body.pcode} ,
-            pprice=${req.body.pprice},
-            totalQ=${req.body.quantity} , 
-            pmodel=${req.body.pmodel} ,
-            make=${req.body.pmake} ,
-            year=${year},
-            pdescription=${pdesc} ,
-            pcountry=${req.body.country}
-            image=${req.file.filename}
-            WHERE pid=${req.body.produtid}`, (err, rows, fields) => {
+            connection.query(`UPDATE products SET pname=? , pcode=? ,pprice=? ,totalQ=? , pmodel=? ,make=? ,year=? ,pdescription=? ,pcountry=? ,image=? WHERE pid=${req.body.pid}`, [req.body.pname, req.body.pcode, req.body.pprice, req.body.quantity, req.body.pmodel, req.body.pmake, year, req.body.pdesc, req.body.country, req.file.filename], (err, rows, fields) => {
                 if (!err)
                     res.send({ success: "Product Updated Successfully" });
                 else
-                    console.log(err);
+                    res.send(err);
             })
         } catch (error) {
 
@@ -110,8 +98,11 @@ router.post("/initCart", (req, res) => {
                                     //total price
                                 connection.query('UPDATE cart SET totalPrice = quantity * price WHERE cartNumber="' + req.body.obj.cartid + '" AND itemid="' + req.body.obj.id + '" AND status=0')
                                     // leftq must not be less than 0 
-                            } else
+                            } else {
                                 res.send({ error: "Sorry , Item Finished" })
+                            }
+
+
                         })
                     } else {
                         connection.query("INSERT INTO cart(cartNumber,itemid,itemname,quantity,price,totalPrice,uid) VALUES('" +
@@ -153,12 +144,12 @@ router.put('/updatePQuantityInCart', (req, res) => {
                                 console.log(err);
                         })
                     //update products table
-                connection.query(` UPDATE products SET leftQ = totalQ - ${ req.body.obj.val } - ${ rows[0].sold }
-                        WHERE pid = ${ rows[0].itemid }
+                connection.query(` UPDATE products SET leftQ = totalQ - ${req.body.obj.val} - ${rows[0].sold}
+                        WHERE pid = ${rows[0].itemid}
                         `)
             }
         } else {
-            res.send({ error: "only  " + Number(rows[0].leftQ) + " items Left In The Stock" })
+            res.send({ error: "Sorry Dear,  No Items Left In The Stock" })
         }
 
     })
@@ -167,7 +158,7 @@ router.put('/updatePQuantityInCart', (req, res) => {
 //get single dealer product
 router.get("/dealersproduct", (req, res) => {
         //SELECT * FROM products INNER JOIN users ON products.user_id=users.id
-        connection.query('SELECT * FROM products WHERE user_id=?', [req.query.dealerId], (err, rows, fields) => {
+        connection.query('SELECT * FROM products INNER JOIN users ON products.user_id=users.id WHERE products.user_id=?', [req.query.dealerId], (err, rows, fields) => {
             if (!err)
                 res.send(rows);
             else
@@ -197,12 +188,12 @@ router.get("/gettotal", (req, res) => {
 router.delete("/removecartitem", (req, res) => {
     //user canceled order process so item in the cart must be add back to the stock
     //get item quantity to be remoeved from cart
-    connection.query(`SELECT * FROM cart WHERE id = ${ req.query.key } && status = 0 `, (err, rows, fields) => {
+    connection.query(`SELECT * FROM cart WHERE id = ${req.query.key} && status = 0 `, (err, rows, fields) => {
         if (!err) {
             var itemid = rows[0].itemid;
             var quantity = rows[0].quantity;
             // needs modification
-            connection.query(`UPDATE products SET leftQ = leftQ + ${ quantity } WHERE pid = ${ itemid }
+            connection.query(`UPDATE products SET leftQ = leftQ + ${quantity} WHERE pid = ${itemid}
                         `)
                 //then remove
             connection.query('DELETE FROM cart WHERE id = ? && status=0', [req.query.key], (err, rows, fields) => {
@@ -228,21 +219,46 @@ router.get("/soldItems", (req, res) => {
     })
 
 })
+router.put("/cartProductStatus", (req, res) => {
+    connection.query("SELECT * from cart WHERE id=?", [req.body.obj.itemid], (err, rows, fields) => {
+        if (!err) {
+            //check state
+            if (req.body.obj.status == false) {
+                //not sold
+                connection.query(`UPDATE cart SET delivered ='0' WHERE id = ${req.body.obj.itemid}`)
 
+            } else {
+                //sold
+                connection.query(`UPDATE cart SET delivered ='1' WHERE id = ${req.body.obj.itemid}`)
+
+                //update soldQ in products table
+                connection.query("SELECT * from cart  WHERE id=?", [req.body.obj.itemid], (err, rows, fields) => {
+                    if (!err) {
+                        //get pid 
+                        connection.query(`UPDATE products SET sold = sold + ${req.body.obj.iquantity} WHERE pid = ${rows[0].itemid}`)
+
+
+                    }
+                })
+            }
+        }
+    })
+});
 //make products avalable for other customer 
 //which are allrady in the cart but not delivered
 router.put("/removeFromCartNotDelivered", (req, res) => {
-        try {
-            //update products table
-            connection.query("SELECT * from cart INNER JOIN products ON cart.itemid=products.pid && cart.status=1 WHERE id=?", [req.body.obj.id], (err, rows, fields) => {
-                if (!err) {
-                    connection.query(` UPDATE products SET leftQ = leftQ + ${ req.body.obj.iquantity } WHERE pid = ${rows[0].pid  }`)
 
-                    connection.query(`UPDATE products SET sold = sold - ${ req.body.obj.iquantity } WHERE pid = ${rows[0].pid  }
-                    `)
-                } else
-                    console.log(err);
-            });
+        try {
+            if (req.body.obj.state == 0) { //not sold
+                //update products table
+                connection.query("SELECT * from cart INNER JOIN products ON cart.itemid=products.pid && cart.status=1 WHERE id=?", [req.body.obj.id], (err, rows, fields) => {
+                    if (!err) {
+                        connection.query(` UPDATE products SET leftQ = leftQ + ${req.body.obj.iquantity} WHERE pid = ${rows[0].pid}`)
+
+                    } else
+                        console.log(err);
+                });
+            }
 
             //then remove item from cart so that someone else can buy
 
@@ -262,7 +278,7 @@ router.put("/removeFromCartNotDelivered", (req, res) => {
 router.put("/placeorder", (req, res) => {
         try {
             if (req.body.obj.order.fullname != '' || req.body.obj.order.phone != '' || req.body.obj.order.email != '' || req.body.obj.order.city != '' || req.body.obj.order.wereda != '' || req.body.obj.order.kebele != '' || req.body.obj.order.housenum != '') {
-                connection.query(`UPDATE cart SET status = 1, customer = ? , phone = ? , email = ? , city = ? , wereda = ? , kebele = ? , housenumber = ? , note = ? WHERE cartNumber = ${ req.body.obj.cartid } && status = 0 `, [req.body.obj.order.fullname, req.body.obj.order.phone, req.body.obj.order.email, req.body.obj.order.city, req.body.obj.order.wereda, req.body.obj.order.kebele, req.body.obj.order.housenum, req.body.obj.order.desc], (err, rows, fields) => {
+                connection.query(`UPDATE cart SET status = 1, customer = ? , phone = ? , email = ? , city = ? , wereda = ? , kebele = ? , housenumber = ? , note = ? WHERE cartNumber = ${req.body.obj.cartid} && status = 0 `, [req.body.obj.order.fullname, req.body.obj.order.phone, req.body.obj.order.email, req.body.obj.order.city, req.body.obj.order.wereda, req.body.obj.order.kebele, req.body.obj.order.housenum, req.body.obj.order.desc], (err, rows, fields) => {
                     if (!err)
                     //update sold quantity when product is delivered
                         res.send({ success: "Thank You , Your Order will Soon Delivered To You" });
@@ -278,7 +294,7 @@ router.put("/placeorder", (req, res) => {
     })
     //view all products  which are verified
 router.get("/all", (req, res) => {
-        connection.query('SELECT * FROM products WHERE status=1 && leftQ >=1', (err, rows, fields) => {
+        connection.query(' SELECT * FROM products INNER JOIN users ON products.user_id=users.id WHERE products.status=1 && products.leftQ >=1 ', (err, rows, fields) => {
             if (!err)
                 res.send(rows);
             else

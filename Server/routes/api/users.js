@@ -1,14 +1,33 @@
+/**
+ * backend rest api handle users request & response specifically for user information
+ * Author abebaw ,beza lidet & tarik
+ * Last Modified Date: feb 27 , 2021
+ */
+
 const mysql = require('mysql');
 const express = require('express');
 const nodemailer = require('nodemailer');
 const router = express.Router();
 const connection = require("../../config/db.config");
 const md5 = require('md5');
+const e = require('express');
+const multer = require("multer");
+const path = require("path");
+
 var timeElapsed = Date.now();
 var today = new Date(timeElapsed);
 var now = today.toUTCString();
 
-//register new user
+const storage = multer.diskStorage({
+    destination: './Server/Uprofile/Images',
+    filename: (req, file, cb) => {
+        return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
+    }
+})
+const upload = multer({
+        storage: storage
+    })
+    //register new user
 router.post('/rgnewuser', (req, res) => {
     try {
         if (req.body.obj.fname == "" || req.body.obj.lname == "" || req.body.obj.email == "" || req.body.obj.pass == "" || req.body.obj.phon == "" || req.body.obj.desc == "" || req.body.obj.cname == "") {
@@ -33,8 +52,57 @@ router.post('/rgnewuser', (req, res) => {
         return error;
     }
 });
+//update user information
+router.put("/edituser", (req, res) => {
+    if (req.body.obj.oldpass == '' && req.body.obj.newpass == '' && req.body.obj.fname != '' && req.body.obj.lname != '' && req.body.obj.phone != '' && req.body.obj.desc != '' && req.body.obj.email != '' && req.body.obj.cname != '') {
+        connection.query('UPDATE users set fname=?,lname=?,phone=?,email=?,description=? WHERE email="' +
+            req.body.obj.oldMail + '"', [req.body.obj.fname, req.body.obj.lname, req.body.obj.phone, req.body.obj.email, req.body.obj.desc], (err, rows, fields) => {
+                if (!err) {
+                    res.send({ success: "Information Updated" });
+                } else
+                    res.send({ error: "something went wrong" });
+            })
+    } else if (req.body.obj.oldpass != '' && req.body.obj.newpass != '' && req.body.obj.fname != '' && req.body.obj.lname != '' && req.body.obj.phone != '' && req.body.obj.desc != '' && req.body.obj.email != '' && req.body.obj.cname != '') {
+        //user is trying to change their password
+        //check if user entered old password match the one in the db
+        connection.query('SELECT * FROM users WHERE email=?', [req.body.obj.oldMail], (err, rows, fields) => {
+            if (!err) {
+                if (rows[0].pass != md5(req.body.obj.oldpass)) {
+                    res.send({ error: "Old Password Is Not Correct" });
+                } else if (rows[0].pass == md5(req.body.obj.oldpass)) {
+                    //update user password
+                    connection.query('UPDATE users set fname=?,lname=?,phone=?,email=?,pass=?,description=? WHERE email="' +
+                        req.body.obj.oldMail + '"', [req.body.obj.fname, req.body.obj.lname, req.body.obj.phone, req.body.obj.email, md5(req.body.obj.newpass), req.body.obj.desc], (err, rows, fields) => {
+                            if (!err) {
+                                res.send({ success: "Information Updated" });
+                            } else
+                                res.send({ error: "something went wrong" });
+                        })
 
-//login
+                } else {
+                    //do nothing
+                }
+            } else
+                console.log(err);
+        })
+
+    } else {
+        res.send({ error: "All information Required" });
+    }
+});
+router.post("/editprofile", upload.single('profile'), (req, res) => {
+        try {
+            connection.query(`UPDATE users SET photo=? WHERE email=?`, [req.file.filename, req.body.email], (err, rows, fields) => {
+                if (!err)
+                    res.send({ success: "Profile pic updated successfully" });
+                else
+                    res.send(err);
+            })
+        } catch (error) {
+
+        }
+    })
+    //login 
 router.post("/login", (req, res) => {
     connection.query('SELECT * FROM users  WHERE status=? && email=? && pass=?', ["1", req.body.email, md5(req.body.pass)], (err, rows, fields) => {
         if (!err) {
@@ -121,7 +189,7 @@ router.put("/status", (req, res) => {
 });
 //get all users (admin page)
 router.get("/dealers", (req, res) => {
-    connection.query('SELECT * FROM users WHERE id !=1 ORDER BY regTime DESC', (err, rows, fields) => {
+    connection.query('SELECT * FROM users WHERE id !=1  ORDER BY regTime DESC', (err, rows, fields) => {
         if (!err)
             res.send(rows);
         else
@@ -246,6 +314,47 @@ router.get("/shownotice", (req, res) => {
             console.log(err);
     })
 })
+router.delete("/deletenotice", (req, res) => {
+    connection.query('DELETE FROM notice WHERE id = ?', [req.query.id], (err, rows, fields) => {
+        if (!err) {
+            res.send({ success: "Post Deleted" })
+        }
+    })
+})
+
+//log user activities 
+router.post("/logactivity", (req, res) => {
+        connection.query("INSERT INTO log (action,timeAction,FromDevice) VALUES('" +
+            req.body.obj.action + "','" +
+            req.body.obj.duration + "','" +
+            req.body.obj.agent + "') ", (err, rows, fields) => {
+                if (!err)
+                    res.send(rows)
+                else
+                    res.send("")
+            })
+    })
+    //get activity logs
+router.get("/getlogs", (req, res) => {
+    connection.query("SELECT * FROM log ORDER BY id DESC", (err, rows, fields) => {
+        if (!err) {
+            res.send(rows);
+        } else
+            console.log(err);
+    })
+})
+router.get("/searchlogs", (req, res) => {
+    connection.query('SELECT * FROM log  WHERE action LIKE "%' +
+        req.query.key + '%" || timeAction LIKE "%' +
+        req.query.key + '%" || FromDevice LIKE "%' +
+        req.query.key + '%" ', (err, rows, fields) => {
+            if (!err) {
+                res.send(rows);
+            } else
+                console.log(err);
+        });
+});
+///not finished 
 router.get("/resetpassword", (req, res) => {
     let transport = nodemailer.createTransport({
         host: 'smtp.gmail.com',

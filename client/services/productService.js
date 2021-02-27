@@ -1,3 +1,10 @@
+/**
+ *   web service which communicate with backend rest api & feed product related informations 
+ *   as per user request.
+ *   Author:abebaw ,beza lidet & tarik
+     Last Modified Date: feb 27 , 2021
+
+ */
 import axios from "axios";
 
 const url = "http://localhost:5000/products/";
@@ -44,6 +51,17 @@ class Productservice {
     static async updateProductQuantity(obj) {
         try {
             const response = await axios.put(url + "/updatePQuantityInCart", {
+                obj
+
+            })
+            return response.data
+        } catch (err) {
+            return err
+        }
+    }
+    static async itemSold(obj) {
+        try {
+            const response = await axios.put(url + "/cartProductStatus", {
                 obj
 
             })

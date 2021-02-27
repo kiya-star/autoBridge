@@ -1,73 +1,17 @@
+<!-- 
+          
+          
+          This web application is a single page application 
+          the page is devided into multiple components & rendered as per user request,
+          it communicates with the backend api.
+          Author:abebaw ,beza lidet & tarik
+          Last Modified Date: feb 27 , 2021
+
+
+-->
+
 <template>
   <div>
-    <!-- Modal -->
-    <div
-      class="modal fade"
-      id="updateProfile"
-      tabindex="-1"
-      role="dialog"
-      aria-labelledby="updateProfileTitle"
-      aria-hidden="true"
-      style="margin-top:100px;"
-    >
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="updateProfileTitle">
-              Update Profile
-            </h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="row">
-                 <div class="col-sm-1"></div>
-                 <div class="col-sm-4">
-                    <img
-                      :src="`http://localhost:5000/${profile}`"
-                      alt=""
-                      width="100px;"
-                      height="100px;"
-                      class="img rounded-circle"
-                    />
-                    <br>
-                 </div>
-                  <div class="col-sm-2">
-                       <br><br>
-                      <form>
-                        <input type="file" style="margin-left:-60px;">
-                    </form>
-                  </div>
-                 <div class="col-sm-12">
-                   <div style="margin-left:50px;">
-                     <br>
-                      <h3>Adye </h3>
-                      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                     Inventore vel eius necessitatibus autem dolores quibusdam voluptatibus sapiente nostrum porro facilis culpa, quo quaerat nisi ea enim excepturi soluta quas assumenda.</p>
-                   </div>
-                </div>
-            </div>
-           
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >
-              Close
-            </button>
-            <button type="button" class="btn btn-primary"   @click="updateProfile()">Save changes</button>
-          </div>
-        </div>
-      </div>
-    </div>
     <!-- navbar-->
     <header class="header bg-white newHeader">
       <div class="container px-0 px-lg-3">
@@ -82,7 +26,6 @@
               ></a
             >
           </router-link>
-
           <button
             class="navbar-toggler navbar-toggler-right"
             type="button"
@@ -209,12 +152,11 @@
                         />
 
                         <a href="#">
-                           <i
-                          data-toggle="modal"
-                          data-target="#updateProfile"
-                          class="fa fa-edit"
-                          style="margin-left:-5px;color:red;font-size:15px;"
-                        ></i>
+                          <i
+                            @click="updateProfile()"
+                            class="fa fa-edit"
+                            style="margin-left:-5px;color:red;font-size:15px;"
+                          ></i>
                         </a>
                       </p>
                       <p
@@ -467,7 +409,9 @@
                         class="fa fa-exclamation-circle"
                         aria-hidden="true"
                       ></i>
-                      Sorry ! , No Product To Show
+                      Searching for {{ searchvalue }}
+                      <br />
+                      <span>Sorry, No Item Found </span>
                     </p>
                   </div>
                   <div v-if="count >= 1">
@@ -1184,7 +1128,7 @@
                   <label class="text-uppercase" for="fname">First Name</label>
                   <input
                     class="form-control form-control-lg"
-                    id="fname"
+                    id="rgfname"
                     type="text"
                     v-model.trim="$v.userinformation.fname.$model"
                     placeholder="Enter your First Name"
@@ -1396,7 +1340,8 @@
             menu == 'product' ||
               menu == 'dealer' ||
               menu == 'cart' ||
-              menu == 'feedback'
+              menu == 'feedback' ||
+              menu == 'log'
           "
         >
           <div style="height:100px;"></div>
@@ -1433,6 +1378,11 @@
                               >(all are required )</span
                             >
                           </i>
+                          <span
+                            style="float:right;color:green;"
+                            v-if="success"
+                            >{{ success }}</span
+                          >
                         </h2>
                         <div
                           v-for="(item, index) in modalProductUpdate"
@@ -1477,9 +1427,9 @@
                                       <option :value="item.pcountry">{{
                                         item.pcountry
                                       }}</option>
-                                      <option value="">Usa</option>
-                                      <option value="">Japan</option>
-                                      <option value="">Germany</option>
+                                      <option value="USA">Usa</option>
+                                      <option value="JAPAN">Japan</option>
+                                      <option value="GERMENY">Germany</option>
                                     </select>
                                     <input
                                       type="file"
@@ -1523,7 +1473,7 @@
                                     />
                                     <input
                                       type="number"
-                                      name="produtid"
+                                      name="pid"
                                       :value="item.pid"
                                       class="form-control"
                                     />
@@ -1542,6 +1492,7 @@
                                     type="submit"
                                     value="Update"
                                     class="btn btn-primary"
+                                    @click="showsuccess()"
                                   />
                                   <input
                                     type="submit"
@@ -1601,7 +1552,11 @@
                 ><i class="fa fa-cart-plus"></i>
                 <strong class="text-small"> CART</strong></a
               >
-
+              <a class="nav-link" href="#" v-if="isadmin" @click="log()">
+                <strong class="text-small">
+                  <i class="fa fa-list"></i> LOG
+                </strong></a
+              >
               <a class="nav-link" href="#" @click="feedback()"
                 ><i class="fa fa-notification"></i>
                 <strong class="text-small">
@@ -1641,86 +1596,90 @@
               <div class="col-sm-12">
                 <div id="page-content-wrapper">
                   <div v-if="count >= 1">
-                    <table class="table table-hover table-striped">
-                      <thead class="bg-light">
-                        <tr>
-                          <th><strong>#</strong></th>
-                          <th><strong class="text-small">NAME</strong></th>
-                          <th><strong class="text-small">CODE</strong></th>
-                          <th><strong class="text-small">PRICE</strong></th>
-                          <th><strong class="text-small">MODEL</strong></th>
-                          <th><strong class="text-small">YEAR</strong></th>
-                          <th><strong class="text-small">COUNTRY</strong></th>
-                          <th><strong class="text-small">DEALER</strong></th>
-                          <th>
-                            <strong class="text-small">DESCRIPTION</strong>
-                          </th>
-                          <th><strong class="text-small">TOTAL</strong></th>
-                          <th><strong class="text-small">lEFT</strong></th>
-                          <th v-if="!isadmin">
-                            <strong class="text-small">STATUS</strong>
-                          </th>
-                          <th v-if="!isadmin"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="(product, index) in products" :key="index">
-                          <td>{{ index + 1 }}</td>
-                          <td>{{ product.pname }}</td>
-                          <td>{{ product.pcode }}</td>
-                          <td>{{ product.pprice }}</td>
-                          <td>{{ product.pmodel }}</td>
-                          <td>{{ product.year }}</td>
-                          <td>{{ product.pcountry }}</td>
-                          <td>{{ product.companyname }}</td>
-                          <td class="alert alert-info">
-                            {{ product.pdescription }}
-                          </td>
-                          <td>{{ product.totalQ }}</td>
-                          <td>{{ product.leftQ }}</td>
-                          <td
-                            v-if="!isadmin"
-                            @click="productStatus(product.pid, product.status)"
-                          >
-                            <div v-if="product.status == 1">
-                              <input type="checkbox" checked />
-                            </div>
-                            <div v-else>
-                              <input type="checkbox" value="0" />
-                            </div>
-                          </td>
-                          <td v-if="loggedInRole != 'admin'">
-                            <a
-                              href="#productEdit"
-                              data-toggle="modal"
-                              data-target="#productEdit"
-                              @click="updateProduct(product.pid)"
+                    <table class="table table-hover table-striped" id="table">
+                      <div id="table">
+                        <thead class="bg-light">
+                          <tr>
+                            <th><strong>#</strong></th>
+                            <th><strong class="text-small">NAME</strong></th>
+                            <th><strong class="text-small">CODE</strong></th>
+                            <th><strong class="text-small">PRICE</strong></th>
+                            <th><strong class="text-small">MODEL</strong></th>
+                            <th><strong class="text-small">YEAR</strong></th>
+                            <th><strong class="text-small">COUNTRY</strong></th>
+                            <th><strong class="text-small">DEALER</strong></th>
+                            <th>
+                              <strong class="text-small">DESCRIPTION</strong>
+                            </th>
+                            <th><strong class="text-small">TOTAL</strong></th>
+                            <th><strong class="text-small">lEFT</strong></th>
+                            <th v-if="!isadmin">
+                              <strong class="text-small">STATUS</strong>
+                            </th>
+                            <th v-if="!isadmin"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="(product, index) in products" :key="index">
+                            <td>{{ index + 1 }}</td>
+                            <td>{{ product.pname }}</td>
+                            <td>{{ product.pcode }}</td>
+                            <td>{{ product.pprice }}</td>
+                            <td>{{ product.pmodel }}</td>
+                            <td>{{ product.year }}</td>
+                            <td>{{ product.pcountry }}</td>
+                            <td>{{ product.companyname }}</td>
+                            <td class="alert alert-info">
+                              {{ product.pdescription }}
+                            </td>
+                            <td>{{ product.totalQ }}</td>
+                            <td>{{ product.leftQ }}</td>
+                            <td
+                              v-if="!isadmin"
+                              @click="
+                                productStatus(product.pid, product.status)
+                              "
                             >
-                              <i class="fa fa-edit"></i
-                            ></a>
-                          </td>
-                          <td
-                            v-if="!isadmin"
-                            @click="deleteProduct(product.pid)"
-                          >
-                            <i
-                              class="fa fa-trash btn btn-danger"
-                              style="border-radius:8px;"
-                            ></i>
-                          </td>
-                        </tr>
-                      </tbody>
+                              <div v-if="product.status == 1">
+                                <input type="checkbox" checked />
+                              </div>
+                              <div v-else>
+                                <input type="checkbox" value="0" />
+                              </div>
+                            </td>
+                            <td v-if="loggedInRole != 'admin'">
+                              <a
+                                href="#productEdit"
+                                data-toggle="modal"
+                                data-target="#productEdit"
+                                @click="updateProduct(product.pid)"
+                              >
+                                <i class="fa fa-edit"></i
+                              ></a>
+                            </td>
+                            <td
+                              v-if="!isadmin"
+                              @click="deleteProduct(product.pid)"
+                            >
+                              <i
+                                class="fa fa-trash btn btn-danger"
+                                style="border-radius:6px;"
+                              ></i>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </div>
                     </table>
                   </div>
                   <div v-else>
                     <div>
-                      <h3 class="alert alert-danger">
+                      <h5 class="alert alert-danger">
                         <i
                           class="fa fa-exclamation-circle"
                           aria-hidden="true"
                         ></i>
                         No data To Show
-                      </h3>
+                      </h5>
                       <p class="alert alert-info">
                         Searching for:{{ searchvalue }}
                       </p>
@@ -1735,112 +1694,79 @@
           <br />
           <div v-if="count >= 1">
             <table class="table-wrapper table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th><strong class="text-small">#</strong></th>
-                  <th><strong class="text-small">FIRST NAME</strong></th>
-                  <th><strong class="text-small">LAST NAME</strong></th>
-                  <th><strong class="text-small">E-MAIL</strong></th>
-                  <th><strong class="text-small">PHONE</strong></th>
-                  <th><strong class="text-small">COMPANY</strong></th>
-                  <th><strong class="text-small">DESCRIPTION</strong></th>
-                  <th><strong class="text-small">ROLE</strong></th>
-                  <th><strong class="text-small">STATUS</strong></th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody class="text-small" id="list">
-                <tr v-for="(user, index) in userList" :key="index">
-                  <td>{{ index + 1 }}</td>
-                  <td>
-                    {{ user.fname }}
-                  </td>
-                  <td>
-                    {{ user.lname }}
-                  </td>
-                  <td class=" text-small">
-                    {{ user.email }}
-                  </td>
-                  <td>
-                    {{ user.phone }}
-                  </td>
-                  <td>
-                    {{ user.companyname }}
-                  </td>
-                  <td class="alert alert-info text-small">
-                    {{ user.description }}
-                  </td>
-                  <td>
-                    <select @change="updateRole(user.id)" id="role">
-                      <option :value="user.role">{{ user.role }}</option>
-                      <option value="admin">admin</option>
-                      <option value="dealer">dealer</option>
-                    </select>
-                  </td>
-                  <td @click="editStatus(user.id, user.status)">
-                    <div v-if="user.status == 1">
-                      <input type="checkbox" checked />
-                    </div>
-                    <div v-else>
-                      <input type="checkbox" value="0" />
-                    </div>
-                  </td>
-                  <td @click="remove(user.id)">
-                    <a>
-                      <i
-                        class="fa fa-trash btn btn-danger"
-                        style="border-radius:8px;"
-                      ></i
-                    ></a>
-                  </td>
-                </tr>
-              </tbody>
+              <div id="table">
+                <thead>
+                  <tr>
+                    <th><strong class="text-small">#</strong></th>
+                    <th><strong class="text-small">FIRST NAME</strong></th>
+                    <th><strong class="text-small">LAST NAME</strong></th>
+                    <th><strong class="text-small">E-MAIL</strong></th>
+                    <th><strong class="text-small">PHONE</strong></th>
+                    <th><strong class="text-small">COMPANY</strong></th>
+                    <th><strong class="text-small">DESCRIPTION</strong></th>
+                    <th><strong class="text-small">ROLE</strong></th>
+                    <th><strong class="text-small">STATUS</strong></th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody class="text-small" id="list">
+                  <tr v-for="(user, index) in userList" :key="index">
+                    <td>{{ index + 1 }}</td>
+                    <td>
+                      {{ user.fname }}
+                    </td>
+                    <td>
+                      {{ user.lname }}
+                    </td>
+                    <td class=" text-small">
+                      {{ user.email }}
+                    </td>
+                    <td>
+                      {{ user.phone }}
+                    </td>
+                    <td>
+                      {{ user.companyname }}
+                    </td>
+                    <td class="alert alert-info text-small">
+                      {{ user.description }}
+                    </td>
+                    <td>
+                      <select @change="updateRole(user.id)" id="role">
+                        <option :value="user.role">{{ user.role }}</option>
+                        <option value="admin">admin</option>
+                        <option value="dealer">dealer</option>
+                      </select>
+                    </td>
+                    <td @click="editStatus(user.id, user.status)">
+                      <div v-if="user.status == 1">
+                        <input type="checkbox" checked />
+                      </div>
+                      <div v-else>
+                        <input type="checkbox" value="0" />
+                      </div>
+                    </td>
+                    <td @click="remove(user.id)">
+                      <a href="#">
+                        <i
+                          class="fa fa-trash btn btn-danger"
+                          style="border-radius:4px;"
+                        ></i
+                      ></a>
+                    </td>
+                  </tr>
+                </tbody>
+              </div>
             </table>
           </div>
           <div v-else>
             <div>
-              <h3 class="alert alert-danger">
+              <h5 class="alert alert-danger">
                 <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
                 No data To Show
-              </h3>
+              </h5>
               <p class="alert alert-info">Searching for:{{ searchvalue }}</p>
             </div>
           </div>
-        </div>
-        <div v-if="count >= 3 && menu != 'cart' && menu != 'feedback'">
-          <nav aria-label="Page navigation example">
-            <ul
-              class="pagination justify-content-center justify-content-lg-end"
-            >
-              <li class="page-item">
-                <a class="page-link" href="#" aria-label="Previous"
-                  ><span aria-hidden="true"
-                    ><i
-                      class="fa fa-chevron-circle-left"
-                      aria-hidden="true"
-                    ></i></span
-                ></a>
-              </li>
-              <li class="page-item active">
-                <a class="page-link" href="#">1</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#">2</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#">3</a>
-              </li>
-              <li class="page-item">
-                <a class="page-link" href="#" aria-label="Next"
-                  ><span aria-hidden="true"
-                    ><i
-                      class="fa fa-chevron-circle-right"
-                      aria-hidden="true"
-                    ></i></span
-                ></a>
-              </li>
-            </ul>
-          </nav>
         </div>
         <div v-if="menu == 'cart'">
           <div class="container">
@@ -1877,7 +1803,7 @@
                               </th>
                               <th class="border-0" scope="col">
                                 <strong class="text-small">
-                                  CUSTOMER
+                                  CLIENT
                                 </strong>
                               </th>
                               <th class="border-0" scope="col">
@@ -1900,17 +1826,14 @@
                                   We/Ke
                                 </strong>
                               </th>
-                              <!-- <th class="border-0" scope="col">
-                              <strong class="text-small">
-                                Kebele
-                              </strong>
-                            </th> -->
                               <th class="border-0" scope="col">
                                 <strong class="text-small ">
                                   HOUSE
                                 </strong>
                               </th>
-
+                              <th class="border-0" scope="col">
+                                <i class="fa fa-check"></i>
+                              </th>
                               <th
                                 class="border-0"
                                 scope="col"
@@ -1970,6 +1893,23 @@
                               </td>
                               <td>{{ soldItem.housenumber }}</td>
 
+                              <td
+                                @click="
+                                  CartProductStatus(
+                                    soldItem.id,
+                                    soldItem.quantity,
+                                    soldItem.delivered
+                                  )
+                                "
+                              >
+                                <div v-if="soldItem.delivered == 1">
+                                  <input type="checkbox" checked />
+                                </div>
+                                <div v-else>
+                                  <input type="checkbox" />
+                                </div>
+                              </td>
+
                               <td>
                                 <a
                                   href="#"
@@ -2000,14 +1940,15 @@
               <div class="col-sm-6">
                 <p class="alert alert-danger">
                   <i class="fa fa-info-circle"></i> There is no sold item to
-                  show
+                  show with
+                  <span style="color:blue"> {{ searchvalue }}</span> key
                 </p>
               </div>
             </div>
           </div>
         </div>
         <div v-if="menu == 'productForm'">
-          <div style="height:30px;"></div>
+          <div style="height:90px;"></div>
           <div class="container">
             <!-- add product form start-->
 
@@ -2344,6 +2285,58 @@
             </div>
           </div>
         </div>
+        <div v-if="menu == 'log'">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-sm-12">
+                <div id="page-content-wrapper">
+                  <div v-if="count >= 1">
+                    <table class="table table-hover table-striped" id="table">
+                      <div id="table">
+                        <thead class="bg-light">
+                          <tr>
+                            <th><strong>#</strong></th>
+                            <th>
+                              <strong class="text-small">Activity</strong>
+                            </th>
+                            <th>
+                              <strong class="text-small">User Agent</strong>
+                            </th>
+                            <th>
+                              <strong class="text-small">Duration</strong>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="(log, index) in logList" :key="index">
+                            <td>{{ index + 1 }}</td>
+                            <td>{{ log.action }}</td>
+                            <td>{{ log.FromDevice }}</td>
+                            <td>{{ log.timeAction }}</td>
+                          </tr>
+                        </tbody>
+                      </div>
+                    </table>
+                  </div>
+                  <div v-else>
+                    <div>
+                      <h5 class="alert alert-danger">
+                        <i
+                          class="fa fa-exclamation-circle"
+                          aria-hidden="true"
+                        ></i>
+                        No data To Show
+                      </h5>
+                      <p class="alert alert-info">
+                        Searching for:{{ searchvalue }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <!--  dashboard section end -->
@@ -2493,6 +2486,7 @@
         </div>
       </div>
     </div>
+    <!-- blog begin -->
     <div v-if="flag == 10">
       <div class="container">
         <div class="col-sm-12">
@@ -2505,7 +2499,12 @@
           <div v-for="(notice, index) in noticeList" :key="index">
             <h4>{{ notice.title }}</h4>
             <p class="text-muted" style="font-size:10px;">{{ notice.time }}</p>
-            <p>{{ notice.body }}</p>
+            <p style="background-color:lightyellow">
+              {{ notice.body }}
+              <a href="#" @click="deletenotice(notice.id)" style="float:right;">
+                <i class="fa fa-remove"></i
+              ></a>
+            </p>
           </div>
         </div>
         <div class="col-sm-8" v-if="loggedInRole == 'admin'">
@@ -2534,7 +2533,191 @@
         </div>
       </div>
     </div>
+    <!-- blog end -->
     <!-- reset password ends -->
+    <!-- edit profile -->
+    <div v-if="flag == 11">
+      <div class="container userform" style="padding-top:90px;">
+        <section>
+          <div class="row">
+            <div class="col-lg-8 ml-auto mr-auto">
+              <h5 class="text-uppercase">
+                <i class="fa fa-edit"></i> Edit Profile
+              </h5>
+              <br />
+
+              <div class="row">
+                <div class="col-sm-6">
+                  <div class="col-lg-6 form-group">
+                    <img
+                      :src="`http://localhost:5000/${profile}`"
+                      alt=""
+                      width="150px;"
+                      height="150px;"
+                      class="img rounded-circle"
+                      style="margin-bottom:20px;"
+                    />
+                    <form
+                      action="http://localhost:5000/users/editprofile"
+                      method="post"
+                      target="editprofile"
+                      enctype="multipart/form-data"
+                    >
+                      <div class="form-group">
+                        <input
+                          type="text"
+                          name="email"
+                          :value="loggedInEmail"
+                          hidden
+                        />
+                        <input type="file" name="profile" />
+                        <button
+                          type="submit"
+                          class="btn btn-primary form-control"
+                          style="margin-top:10px;"
+                        >
+                          <i class="fa fa-save"></i> Save
+                        </button>
+                      </div>
+                    </form>
+                    <iframe
+                      name="editprofile"
+                      width="0"
+                      height="0"
+                      border="0"
+                      style="display:none;"
+                    ></iframe>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <h4 class="text-uppercase">Auto Bridge</h4>
+                  <p>
+                    {{ edit.desc }}
+                  </p>
+                  <p class="text-muted">
+                    <strong>{{ loggedInEmail }}</strong>
+                  </p>
+                </div>
+              </div>
+
+              <br />
+              <h5 class="text-uppercase">
+                <i class="fa fa-edit"></i> Personal Information
+                <span
+                  ><input
+                    type="checkbox"
+                    v-model="pInfoToggle"
+                    @click="togglePinfo()"
+                  />
+                </span>
+              </h5>
+              <p v-if="success" class="alert alert-success">
+                {{ success }}
+              </p>
+
+              <p v-if="error" class="alert alert-danger">
+                <i class="fa fa-warning"></i> {{ error }}
+              </p>
+              <div class="row" id="personalinfo" v-if="pInfoToggle == true">
+                <div class="col-lg-6 form-group">
+                  <label class="text-uppercase" for="fname">First Name</label>
+                  <input
+                    class="form-control form-control-lg"
+                    v-model="edit.fname"
+                    type="text"
+                    placeholder="Enter your First Name"
+                  />
+                </div>
+                <div class="col-lg-6 form-group">
+                  <label class="text-uppercase" for="lname">Last Name</label>
+                  <input
+                    class="form-control form-control-lg"
+                    v-model="edit.lname"
+                    type="text"
+                    placeholder="Enter your Last Name"
+                  />
+                </div>
+                <div class="col-lg-6 form-group">
+                  <label class="text-uppercase" for="email">E-mail</label>
+                  <input
+                    class="form-control form-control-lg"
+                    v-model="edit.email"
+                    type="email"
+                    placeholder="Enter your E-mail"
+                  />
+                </div>
+                <div class="col-lg-6 form-group">
+                  <label class="text-small" for="lastName">Old Password</label>
+                  <input
+                    class="form-control form-control-lg"
+                    v-model="edit.oldpass"
+                    type="password"
+                    placeholder="Enter old Password"
+                  />
+                  <label class="text-small" for="lastName">New Password</label>
+                  <input
+                    class="form-control form-control-lg"
+                    v-model="edit.newpass"
+                    type="password"
+                    placeholder="Enter new Password"
+                  />
+                </div>
+                <div class="col-lg-6 form-group">
+                  <label class="text-uppercase" for="phone">Phone Number</label>
+                  <input
+                    class="form-control form-control-lg"
+                    v-model="edit.phone"
+                    type="number"
+                    placeholder="Enter your Phone Number"
+                  />
+                </div>
+                <div class="col-lg-6 form-group">
+                  <label class="text-uppercase" for="cname">Company Name</label>
+                  <input
+                    class="form-control form-control-lg"
+                    v-model="edit.cname"
+                    type="text"
+                    placeholder="Company name"
+                  />
+                </div>
+                <div class="col-lg-12 form-group">
+                  <label class="text-small text-uppercase" for="desc"
+                    >Description (optional)</label
+                  >
+                  <textarea
+                    class="form-control form-control-lg"
+                    v-model="edit.desc"
+                    name="desc"
+                    type="text"
+                    rows="3"
+                    placeholder="Short Information About Your Company"
+                  />
+                </div>
+                <div class="col-lg-5 form-group" style="margin-bottom:150px;">
+                  <button
+                    class="btn btn-primary text-small"
+                    style="color:#fff;border-radius:4px;"
+                    type="button"
+                    @click="editprofile()"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    class="btn btn-secondary text-small"
+                    style="color:#fff;border-radius:4px;float:right"
+                    type="button"
+                    @click="cancel()"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <!-- edit profile -->
 
     <Footer style="margin-top:250px;postion:fixed" />
   </div>
@@ -2555,7 +2738,7 @@ import axios from "axios";
 import swal from "sweetalert";
 import Datepicker from "vuejs-datepicker";
 import TableExport from "tableexport";
-//import $ from "jquery"
+//import $ from "jquery";
 export default {
   name: "Home",
   components: {
@@ -2628,6 +2811,22 @@ export default {
         email: "",
         message: "",
       },
+      //log
+      userAgent: "",
+      duration: "",
+      logList: [],
+      //edit p
+      pInfoToggle: false,
+      edit: {
+        fname: "",
+        lname: "",
+        oldpass: "",
+        newpass: "",
+        email: "",
+        oldMail: "",
+        cname: "",
+        desc: "",
+      },
       userinformation: {
         fname: "",
         lname: "",
@@ -2690,11 +2889,17 @@ export default {
           pass: this.login.password,
         })
         .then((response) => {
+          localStorage.setItem("fname", response.data[0].fname);
+          localStorage.setItem("lname", response.data[0].lname);
+          localStorage.setItem("cname", response.data[0].companyname);
+          localStorage.setItem("phone", response.data[0].phone);
+          localStorage.setItem("desc", response.data[0].description);
           localStorage.setItem("token", response.data[0].email);
           localStorage.setItem("userrole", response.data[0].role);
           localStorage.setItem("userid", response.data[0].id);
           localStorage.setItem("userStatus", response.data[0].status);
           localStorage.setItem("profile", response.data[0].photo);
+
           this.error = "";
           this.login.email = "";
           this.login.password = "";
@@ -2702,11 +2907,27 @@ export default {
           this.isloggedin = true; //user is logged in
           this.flag = 6; // user redirected to dashboard
 
+          //log activity
+          userService.logActivity({
+            action: `${response.data[0].email} Is Logged IN`,
+            duration: this.duration,
+            agent: this.userAgent,
+          });
+
           this.loggedInEmail = localStorage.getItem("token");
           this.loggedInRole = localStorage.getItem("userrole");
           this.userId = localStorage.getItem("userid");
           this.userStatus = localStorage.getItem("userStatus");
           this.profile = localStorage.getItem("profile");
+
+          //loggedin user info
+          this.edit.fname = localStorage.getItem("fname");
+          this.edit.lname = localStorage.getItem("lname");
+          this.edit.cname = localStorage.getItem("cname");
+          this.edit.phone = localStorage.getItem("phone");
+          this.edit.email = localStorage.getItem("token");
+          this.edit.desc = localStorage.getItem("desc");
+
           if (this.loggedInRole == "admin") {
             this.isadmin = true;
           }
@@ -2719,9 +2940,21 @@ export default {
     logout() {
       this.isloggedin = false;
       this.flag = 4; //go back to account
+
+      //log activity
+      userService.logActivity({
+        action: `${localStorage.getItem("token")} Is Logged Out`,
+        duration: this.duration,
+        agent: this.userAgent,
+      });
       //remove user info
       localStorage.removeItem("token");
-      localStorage.setItem("userrole");
+      localStorage.removeItem("userrole");
+      localStorage.removeItem("fname");
+      localStorage.removeItem("lname");
+      localStorage.removeItem("phone");
+      localStorage.removeItem("desc");
+      localStorage.removeItem("cname");
     },
     async resetPassword(mail) {
       await userService.resetPassword(mail);
@@ -2759,11 +2992,20 @@ export default {
         .then((response) => {
           this.viewCartItem(); //refresh cart
           this.refreshTOtal();
-          console.log(response);
+          if (response.error) {
+            this.error = response.error;
+          }
         })
         .catch((error) => {
           this.error = error;
         });
+    },
+    async CartProductStatus(id, num, status) {
+      await productservice.itemSold({
+        itemid: id,
+        iquantity: num,
+        status: !status,
+      });
     },
     async refreshTOtal() {
       this.totalPrice = await productservice.getTotalPrice(this.cartid);
@@ -2774,8 +3016,9 @@ export default {
         order: this.order,
         cartid: this.cartid,
       });
+
+      this.success = `Thank You ${this.order.fullname}, Your Order will Soon Delivered To You`;
       this.order = "";
-      this.success = "Thank You , Your Order will Soon Delivered To You";
     },
     async NotSold(iname, iquantity, state, id) {
       await productservice.cartItemStatus({
@@ -2795,6 +3038,9 @@ export default {
       TableExport(document.getElementsByTagName("table"), {
         filename: "Sold Products",
       });
+    },
+    showsuccess() {
+      this.success = "Item Updated Successfully";
     },
     async likes(id) {
       await productservice.likeProduct(id);
@@ -2818,14 +3064,50 @@ export default {
       this.flag = 7; // contact us
     },
     blog() {
+      this.success = "";
       this.flag = 10; //blog
     },
+    updateProfile() {
+      this.flag = 11; //edit profile
+    },
+    async editprofile() {
+      this.edit.oldMail = this.loggedInEmail;
+      await userService
+        .updateInformation(this.edit)
+        .then((response) => {
+          if (response.success) {
+            this.error = "";
+            this.success = response.success;
+            //log activity
+            userService.logActivity({
+              action: `User information of e-mail " ${this.loggedInEmail} " updated `,
+              duration: this.duration,
+              agent: this.userAgent,
+            });
+          } else if (response.error) {
+            this.success = "";
+            this.error = response.error;
+          } else {
+            //do nothing
+          }
+        })
+        .catch((error) => {
+          this.error = error;
+        });
+    },
+    togglePinfo() {
+      this.togglePinfo = !this.togglePinfo;
+    },
     account() {
+      this.success = "";
       this.error = "";
       this.flag = 4; //goto account
     },
     forgotPass() {
       this.flag = 9;
+    },
+    log() {
+      this.menu = "log";
     },
     async feedback() {
       this.flag = 6; // go to dashboard
@@ -2866,6 +3148,8 @@ export default {
       element.scrollTop = element.scrollHeight;
     },
     gotoRegister() {
+      this.success = "";
+      this.error = "";
       this.flag = 5; //goto registration
     },
     async goTodashboard() {
@@ -2880,7 +3164,6 @@ export default {
       } else {
         this.products = await productservice.getProducts(this.userId);
       }
-
       this.count = this.products.length;
       this.menu = "product";
     },
@@ -2893,7 +3176,15 @@ export default {
             this.error = "";
             this.iserror = false;
             // clear registration fields
-            this.success = "Welcome ,Thank you for registering";
+            this.success = `Welcome ${this.userinformation.fname},Thank you for registering`;
+            document.getElementById("rgfname").value = "";
+
+            //log activity
+            userService.logActivity({
+              action: `New User ${this.userinformation.fname} registered`,
+              duration: this.duration,
+              agent: this.userAgent,
+            });
           } else if (response.error) {
             this.iserror = true;
             this.error = response.error;
@@ -2914,6 +3205,8 @@ export default {
         this.menu = "product";
       } else if (this.loggedInRole == "admin" && this.menu == "dealer") {
         this.menu == "dealer";
+      } else if (this.loggedInRole == "admin" && this.menu == "log") {
+        this.menu == "log";
       } else if (this.loggedInRole != "admin" && this.menu == "product") {
         this.menu == "product";
       } else if (this.loggedInRole != "admin" && this.menu == "cart") {
@@ -2955,9 +3248,11 @@ export default {
           value
         );
         this.count = this.products.length;
+      } else if (this.menu == "log") {
+        this.logList = await userService.searchLog(value);
+        this.count = this.logList.length;
       } else {
         this.menu = "home";
-        alert(this.menu);
       }
     },
     async postNotice() {
@@ -2967,12 +3262,33 @@ export default {
           mBody: this.mBody,
         });
         this.success = "Notice Posted";
+
+        //log activity
+        userService.logActivity({
+          action: `new notice " ${this.title} " posted`,
+          duration: this.duration,
+          agent: this.userAgent,
+        });
+
         this.title = "";
         this.mBody = "";
         this.noticeList = await userService.showNotice();
       } catch (error) {
         console.log(error);
       }
+    },
+    async deletenotice(id) {
+      await userService.deleteNotice(id).then((response) => {
+        if (response.success) {
+          this.success = response.success;
+        }
+      });
+      userService.logActivity({
+        action: `Notice id " ${id} " Deleted`,
+        duration: this.duration,
+        agent: this.userAgent,
+      });
+      this.noticeList = await userService.showNotice();
     },
     async showSingle(name) {
       this.productList = await userService.getSingleDealer(name);
@@ -3016,14 +3332,18 @@ export default {
       }).then((willDelete) => {
         if (willDelete) {
           productservice.deleteProduct(pid);
+
+          //log activity
+          userService.logActivity({
+            action: `Product with id of " ${pid} " Deleted`,
+            duration: this.duration,
+            agent: this.userAgent,
+          });
           swal(" Product deleted successfully", {
             icon: "success",
           });
         }
       });
-    },
-    updateProfile(id) {
-      alert(id);
     },
     clearOrder() {
       this.order = "";
@@ -3113,6 +3433,12 @@ export default {
       }).then((willDelete) => {
         if (willDelete) {
           userService.deleteUser(id);
+          //log activity
+          userService.logActivity({
+            action: `User(dealer) with id of" ${id} " Deleted`,
+            duration: this.duration,
+            agent: this.userAgent,
+          });
           swal(" User deleted successfully", {
             icon: "success",
           });
@@ -3129,6 +3455,12 @@ export default {
       this.userId = localStorage.getItem("userid");
       this.userStatus = localStorage.getItem("userStatus");
       this.profile = localStorage.getItem("profile");
+      this.edit.fname = localStorage.getItem("fname");
+      this.edit.lname = localStorage.getItem("lname");
+      this.edit.email = localStorage.getItem("token");
+      this.edit.cname = localStorage.getItem("cname");
+      this.edit.phone = localStorage.getItem("phone");
+      this.edit.desc = localStorage.getItem("desc");
 
       this.isloggedin = true;
       if (this.loggedInRole == "admin") {
@@ -3167,6 +3499,13 @@ export default {
       this.mcount = this.messages.length;
       this.adminuser = await userService.getadmin();
       this.noticeList = await userService.showNotice();
+      this.logList = await userService.getLogs();
+
+      this.userAgent = window.navigator.userAgent;
+      //get current date & time
+      var timeElapsed = Date.now();
+      var today = new Date(timeElapsed);
+      this.duration = today.toUTCString();
     } catch (error) {
       this.error = error.message;
     }
@@ -3215,7 +3554,13 @@ export default {
   max-height: 500px;
   overflow: hidden;
 }
-
+#table {
+  max-height: 500px;
+  overflow: hidden;
+}
+#table:hover {
+  overflow-y: scroll;
+}
 #cart:hover {
   overflow-y: scroll;
 }

@@ -1,3 +1,10 @@
+/**
+ *   web service which communicate with backend rest api & feed user related informations 
+ *   as per user request.
+ *   Author:abebaw ,beza lidet & tarik
+     Last Modified Date: feb 27 , 2021
+     
+ */
 import axios from "axios";
 
 const url = "http://localhost:5000/users/";
@@ -13,7 +20,16 @@ class Dealerservice {
             return err
         }
     }
+    static async updateInformation(obj) {
+        try {
+            const response = await axios.put(url + "/edituser", { obj })
+            return response.data
 
+        } catch (err) {
+            return err
+        }
+
+    }
     static async getStatus(id) {
         try {
             const response = await axios.get(url + "/userstatus", {
@@ -227,9 +243,23 @@ class Dealerservice {
             return err
         }
     }
+
     static async showNotice() {
         try {
             const response = await axios.get(url + "/shownotice")
+            return response.data
+
+        } catch (err) {
+            return err
+        }
+    }
+    static async deleteNotice(id) {
+        try {
+            const response = await axios.delete(url + "/deletenotice", {
+                params: {
+                    id: id
+                }
+            })
             return response.data
 
         } catch (err) {
@@ -241,6 +271,38 @@ class Dealerservice {
             const response = await axios.get(url + "/resetpassword", {
                 params: {
                     key: email
+                }
+            })
+            return response.data
+
+        } catch (err) {
+            return err
+        }
+    }
+    static async logActivity(obj) {
+        try {
+            const response = await axios.post(url + "/logactivity", { obj })
+            return response.data
+        } catch (err) {
+            return err
+        }
+
+    }
+    static async getLogs() {
+        try {
+            const response = await axios.get(url + "/getlogs")
+            return response.data
+
+        } catch (err) {
+            return err
+        }
+    }
+
+    static async searchLog(value) {
+        try {
+            const response = await axios.get(url + "/searchlogs", {
+                params: {
+                    key: value
                 }
             })
             return response.data

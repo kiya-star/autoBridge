@@ -37,7 +37,7 @@
           <div class="row">
             <div class="col-lg-12 text-center">
               <p class="small text-muted mb-0">
-                &copy; 2021 All rights reserved.
+              Auto Bridge  &copy; 2021 All Rights Reserved.
               </p>
             </div>
           </div>
