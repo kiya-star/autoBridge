@@ -2,8 +2,11 @@ const express = require('express')
 const bodyParser = require("body-parser");
 const mysql = require("mysql");
 const cors = require("cors");
+const path = require("path")
 const productsroute = require("./routes/api/products");
 const usersroute = require("./routes/api/users");
+const https = require('https')
+const fs = require('fs')
 const app = express();
 
 //Middleware
@@ -23,7 +26,11 @@ app.get('/', (req, res) => {
 
 });
 const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-    console.log(`Server listening at http://localhost:${PORT}`)
-})
+const httpsOptions = {
+    key: fs.readFileSync(path.join(__dirname, "security", "server.key")),
+    cert: fs.readFileSync(path.join(__dirname, "security", "server.cert"))
+}
+const server = https.createServer(httpsOptions, app)
+    .listen(PORT, () => {
+        console.log('server running at ' + PORT)
+    })

@@ -13,7 +13,7 @@
       to Run the client side cd client/ then type  "npm run serve"
 
 
-Notice:Both have to run 
+Notice:Both have too run 
 
 
  

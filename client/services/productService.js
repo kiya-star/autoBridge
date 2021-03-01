@@ -7,7 +7,7 @@
  */
 import axios from "axios";
 
-const url = "http://localhost:5000/products/";
+const url = "https://localhost:5000/products/";
 
 class Productservice {
 

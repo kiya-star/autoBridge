@@ -354,29 +354,8 @@ router.get("/searchlogs", (req, res) => {
                 console.log(err);
         });
 });
-///not finished 
+
 router.get("/resetpassword", (req, res) => {
-    let transport = nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
-        auth: {
-            user: 'israelkumame@gmail.com',
-            pass: '@@yayneman@@'
-        }
-    });
-    const message = {
-        from: 'israelkumame@gmail.com', // Sender address
-        to: req.query.key, // List of recipients
-        subject: 'Design Your Model S | Tesla', // Subject line
-        text: 'Have the most fun you can in a car. Get your Tesla today!' // Plain text body
-    };
-    transport.sendMail(message, function(err, info) {
-        if (err) {
-            console.log(err)
-        } else {
-            console.log(info);
-        }
-    });
+    //not finished 
 })
 module.exports = router;

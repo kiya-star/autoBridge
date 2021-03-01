@@ -127,7 +127,7 @@
                   aria-expanded="false"
                 >
                   <img
-                    :src="`http://localhost:5000/${profile}`"
+                    :src="`https://localhost:5000/${profile}`"
                     alt=""
                     width="25px;"
                     height="25px;"
@@ -144,7 +144,7 @@
                         style="margin-bootm:2px;padding:10px;font-size:12px;border-bottom:1px solid #f4f4f4;text-align:center;"
                       >
                         <img
-                          :src="`http://localhost:5000/${profile}`"
+                          :src="`https://localhost:5000/${profile}`"
                           alt=""
                           width="50px;"
                           height="50px;"
@@ -211,7 +211,7 @@
                       title="Red digital smartwatch"
                     >
                       <img
-                        :src="`http://localhost:5000/${info.image}`"
+                        :src="`https://localhost:5000/${info.image}`"
                         style="width:110%;height:100%;"
                     /></a>
                   </div>
@@ -428,7 +428,7 @@
                           <a class="d-block" href="#"
                             ><img
                               class="img-fluid w-100"
-                              :src="`http://localhost:5000/${product.image}`"
+                              :src="`https://localhost:5000/${product.image}`"
                               product.image
                               alt="..."
                           /></a>
@@ -598,7 +598,7 @@
                               href="#"
                               @click="showDetail()"
                               ><img
-                                :src="`http://localhost:5000/${item.image}`"
+                                :src="`https://localhost:5000/${item.image}`"
                                 alt="..."
                                 width="70"
                             /></a>
@@ -740,7 +740,7 @@
           <div class="row">
             <div class="col-lg-6 ">
               <img
-                :src="`http://localhost:5000/${modalData[0].image}`"
+                :src="`https://localhost:5000/${modalData[0].image}`"
                 width="100%"
               />
             </div>
@@ -825,7 +825,7 @@
                     <a class="d-block"
                       ><img
                         class="img-fluid w-100"
-                        :src="`http://localhost:5000/${item.image}`"
+                        :src="`https://localhost:5000/${item.image}`"
                         alt="..."
                     /></a>
                     <div class="product-overlay">
@@ -1389,7 +1389,7 @@
                           :key="index"
                         >
                           <form
-                            action="http://localhost:5000/products/productedit"
+                            action="https://localhost:5000/products/productedit"
                             method="post"
                             enctype="multipart/form-data"
                             target="myframe"
@@ -1971,7 +1971,7 @@
             </h5>
 
             <form
-              action="http://localhost:5000/products/add"
+              action="https://localhost:5000/products/add"
               method="post"
               enctype="multipart/form-data"
               target="hiddenFrame"
@@ -2164,7 +2164,7 @@
                   "
                 >
                   <img
-                    :src="`http://localhost:5000/${user.photo}`"
+                    :src="`https://localhost:5000/${user.photo}`"
                     alt=""
                     width="25px;"
                     height="25px;"
@@ -2186,7 +2186,7 @@
                 class="text-muted"
               >
                 <img
-                  :src="`http://localhost:5000/${adminuser[0].photo}`"
+                  :src="`https://localhost:5000/${adminuser[0].photo}`"
                   style="width:30px;height:30px;"
                   class="img rounded-circle"
                 />
@@ -2202,7 +2202,7 @@
                   <h5 style=" text-transform: capitalize;" class="text-muted">
                     <img
                       v-if="currentChat != ''"
-                      :src="`http://localhost:5000/${pic}`"
+                      :src="`https://localhost:5000/${pic}`"
                       style="width:30px;height:30px;"
                       class="img rounded-circle"
                     />
@@ -2214,7 +2214,7 @@
                   <h5 style=" text-transform: capitalize;" class="text-muted">
                     <img
                       v-if="currentChat != ''"
-                      :src="`http://localhost:5000/${adminuser[0].photo}`"
+                      :src="`https://localhost:5000/${adminuser[0].photo}`"
                       style="width:30px;height:30px;"
                       class="img rounded-circle"
                     />
@@ -2237,7 +2237,7 @@
                     <div>
                       <p class="text-small">
                         <img
-                          :src="`http://localhost:5000/${chat.photo}`"
+                          :src="`https://localhost:5000/${chat.photo}`"
                           style="width:30px;height:30px;"
                           class="img rounded-circle"
                         />
@@ -2413,7 +2413,7 @@
               <td>
                 <a href="/">
                   <img
-                    :src="`http://localhost:5000/${like.image}`"
+                    :src="`https://localhost:5000/${like.image}`"
                     alt="..."
                     width="70"
                   />
@@ -2550,7 +2550,7 @@
                 <div class="col-sm-6">
                   <div class="col-lg-6 form-group">
                     <img
-                      :src="`http://localhost:5000/${profile}`"
+                      :src="`https://localhost:5000/${profile}`"
                       alt=""
                       width="150px;"
                       height="150px;"
@@ -2558,7 +2558,7 @@
                       style="margin-bottom:20px;"
                     />
                     <form
-                      action="http://localhost:5000/users/editprofile"
+                      action="https://localhost:5000/users/editprofile"
                       method="post"
                       target="editprofile"
                       enctype="multipart/form-data"
@@ -2884,7 +2884,7 @@ export default {
     //============================login===============================
     async handdleLogin() {
       await axios
-        .post("http://localhost:5000/users/login", {
+        .post("https://localhost:5000/users/login", {
           email: this.login.email,
           pass: this.login.password,
         })
