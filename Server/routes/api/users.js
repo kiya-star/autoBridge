@@ -116,7 +116,7 @@ router.post('/comments', (req, res) => {
     try {
         if (req.body.obj.email == "" || req.body.obj.message == "") {
             res.send({
-                error: 'Error sending comment'
+                error: 'E-mail & Message Required'
             });
         } else {
             connection.query("INSERT INTO contacts(email,message) VALUES('" +
@@ -296,18 +296,27 @@ router.get("/admin", (req, res) => {
     })
 })
 router.post("/postnotice", (req, res) => {
-    connection.query("INSERT INTO notice(title, body, time) VALUES('" +
-        req.body.obj.title + "', '" +
-        req.body.obj.mBody + "', '" +
-        now + "')", (err, rows, fields) => {
-            if (!err) {
-                res.send({ success: "Notice Posted" });
-            } else
-                console.log(err);
-        })
+    try {
+
+        if (req.body.obj.title == '' || req.body.obj.mBody == '') {
+            res.send({ error: "Fill Both Fields" });
+        } else {
+            connection.query("INSERT INTO notice(title, body, time) VALUES('" +
+                req.body.obj.title + "', '" +
+                req.body.obj.mBody + "', '" +
+                now + "')", (err) => {
+                    if (!err) {
+                        res.send({ success: "Notice Posted" });
+                    } else
+                        console.log(err);
+                })
+        }
+    } catch (error) {
+        return error;
+    }
 })
 router.get("/shownotice", (req, res) => {
-    connection.query("SELECT * FROM notice", (err, rows, fields) => {
+    connection.query("SELECT * FROM notice ORDER BY id desc", (err, rows, fields) => {
         if (!err) {
             res.send(rows);
         } else

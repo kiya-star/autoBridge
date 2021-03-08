@@ -2992,9 +2992,11 @@ export default {
         .then((response) => {
           this.viewCartItem(); //refresh cart
           this.refreshTOtal();
+         
           if (response.error) {
             this.error = response.error;
           }
+            
         })
         .catch((error) => {
           this.error = error;
@@ -3007,7 +3009,7 @@ export default {
         status: !status,
       });
     },
-    async refreshTOtal() {
+     async refreshTOtal() {
       this.totalPrice = await productservice.getTotalPrice(this.cartid);
     },
     async placeOrder() {
@@ -3260,8 +3262,13 @@ export default {
         await userService.postNotice({
           title: this.title,
           mBody: this.mBody,
-        });
-        this.success = "Notice Posted";
+        }).then((response)=>{
+           if(response.success){
+             this.success = response.success
+           }else if(response.error){
+             this.error = response.error
+           }else{console.log("")}
+        })
 
         //log activity
         userService.logActivity({
@@ -3274,7 +3281,7 @@ export default {
         this.mBody = "";
         this.noticeList = await userService.showNotice();
       } catch (error) {
-        console.log(error);
+         this.error = error
       }
     },
     async deletenotice(id) {

@@ -149,7 +149,7 @@ router.put('/updatePQuantityInCart', (req, res) => {
                         `)
             }
         } else {
-            res.send({ error: "Sorry Dear,  No Items Left In The Stock" })
+            res.send({ error: `Sorry Dear ,You Can Only Add ${rows[0].leftQ} Items More` })
         }
 
     })
