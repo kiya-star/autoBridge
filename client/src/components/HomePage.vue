@@ -1733,8 +1733,8 @@
                     <td>
                       <select @change="updateRole(user.id)" id="role">
                         <option :value="user.role">{{ user.role }}</option>
-                        <option value="admin">admin</option>
-                        <option value="dealer">dealer</option>
+                        <!-- <option value="admin">admin</option>
+                        <option value="dealer">dealer</option> -->
                       </select>
                     </td>
                     <td @click="editStatus(user.id, user.status)">
@@ -2341,7 +2341,7 @@
     </div>
     <!--  dashboard section end -->
     <!-- contact us section begin -->
-    <div v-if="flag == 7">
+      <div v-if="flag == 7">
       <div class="Container">
         <div class="row">
           <div class="col-sm-3"></div>
@@ -2349,7 +2349,7 @@
           <div class="col-sm-6" id="contactmessage">
             <h1 class="text-uppercase" style="margin-top:100px;">Contact Us</h1>
             <p class="alert alert-success" v-if="!iserror">
-              Thank you for comment
+              Thank you for your comment
             </p>
             <p v-if="error" class="alert alert-danger">
               <i class="fa fa-warning"></i> {{ error }}
@@ -2400,6 +2400,8 @@
         </div>
       </div>
     </div>
+    <!-- contact us section end -->
+     <!-- likes & deslikes begin -->
     <div v-if="flag == 8">
       <br />
       <br />
@@ -2450,7 +2452,8 @@
         </table>
       </div>
     </div>
-    <!-- contact us section end -->
+      <!-- likes & deslikes end -->
+
 
     <!-- rest password begin -->
     <div v-if="flag == 9">
@@ -2959,7 +2962,7 @@ export default {
     async resetPassword(mail) {
       await userService.resetPassword(mail);
     },
-    //===============================cart===============================
+    //===============================Cart===============================
     async addToCart(id, itemname, price, usrid) {
       this.cart = this.cart + 1;
       //unique cart id for all customer
@@ -3009,8 +3012,8 @@ export default {
         status: !status,
       });
     },
-     async refreshTOtal() {
-      this.totalPrice = await productservice.getTotalPrice(this.cartid);
+      refreshTOtal() {
+      this.totalPrice =  productservice.getTotalPrice(this.cartid);
     },
     async placeOrder() {
       //place order
@@ -3063,13 +3066,17 @@ export default {
     },
     goTocontactus() {
       this.error = "";
+      this.success = "";
       this.flag = 7; // contact us
     },
     blog() {
+      this.error = "";
       this.success = "";
       this.flag = 10; //blog
     },
     updateProfile() {
+      this.error = "";
+      this.success = "";
       this.flag = 11; //edit profile
     },
     async editprofile() {
@@ -3199,7 +3206,7 @@ export default {
           console.log(error);
         });
     },
-    //============================product=================================
+    //============================Refresh Dashboard=================================
 
     referesh() {
       this.flag = 6;
@@ -3378,11 +3385,11 @@ export default {
       this.menu = "cart";
       this.count = this.soldproducts.length;
     },
-    //=============================notification=======================================
+    //=====================================notification==============================
     async readNotifications() {
       await userService.readMessages();
     },
-    // ============================Comment=============================================
+    // ====================================Comment===================================
     async registerComment() {
       await userService
         .registerComments({

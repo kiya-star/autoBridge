@@ -136,7 +136,7 @@ router.put('/updatePQuantityInCart', (req, res) => {
         if (Number(req.body.obj.val + rows[0].sold) <= rows[0].totalQ) {
             if (req.body.obj.val >= 1) {
                 connection.query("UPDATE cart SET quantity = '" +
-                        req.body.obj.val + "' WHERE id ='" +
+                        req.body.obj.val + "' , totalPrice= quantity * price WHERE id ='" +
                         req.body.obj.id + "' && status=0", (err, rows, fields) => {
                             if (!err)
                                 res.send(rows);

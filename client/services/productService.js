@@ -113,9 +113,9 @@ class Productservice {
             return err
         }
     }
-    static async likeProduct(id) {
+    static async likeProduct(obj) {
         try {
-            const response = await axios.put(url + "/likeproduct", { id })
+            const response = await axios.put(url + "/likeproduct", { obj })
             return response.data
         } catch (err) {
             return err

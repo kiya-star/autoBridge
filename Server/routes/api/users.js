@@ -119,9 +119,10 @@ router.post('/comments', (req, res) => {
                 error: 'E-mail & Message Required'
             });
         } else {
-            connection.query("INSERT INTO contacts(email,message) VALUES('" +
+            connection.query("INSERT INTO contacts(email,message,date) VALUES('" +
                 req.body.obj.email + "','" +
-                req.body.obj.message + "') ", (err, rows, fields) => {
+                req.body.obj.message + "','" +
+                now + "') ", (err, rows, fields) => {
                     if (!err)
                         res.send(rows)
                     else
